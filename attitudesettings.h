@@ -1,3 +1,7 @@
+/*
+* this is a test comment
+*/
+
 /**
  ******************************************************************************
  * @addtogroup UAVObjects LibrePilot UAVObjects
