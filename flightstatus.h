@@ -43,12 +43,15 @@
 #ifndef FLIGHTSTATUS_H
 #define FLIGHTSTATUS_H
 #include <stdbool.h>
+#include <inttypes.h>
 /* Object constants */
 #define FLIGHTSTATUS_OBJID 0x24D25E28
 #define FLIGHTSTATUS_ISSINGLEINST 1
 #define FLIGHTSTATUS_ISSETTINGS 0
 #define FLIGHTSTATUS_ISPRIORITY 0
 #define FLIGHTSTATUS_NUMBYTES sizeof(FlightStatusData)
+
+#define byte uint8_t
 
 /* Field Armed information */
 
