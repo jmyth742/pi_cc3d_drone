@@ -43,6 +43,8 @@
 #ifndef ACCELSENSOR_H
 #define ACCELSENSOR_H
 #include <stdbool.h>
+#include <inttypes.h>
+#define byte uint8_t
 /* Object constants */
 #define ACCELSENSOR_OBJID 0x8B7BBFB6
 #define ACCELSENSOR_ISSINGLEINST 1
