@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include "pi_cc3d_drone/flightstatus.h"
+#include "pi_cc3d_drone/gcsreceiver.h"
 
 #define error_message printf
 #define byte uint8_t
@@ -114,42 +115,48 @@ void set_blocking (int fd, int should_block)
 
 
 
-
+#define BUF_SIZE 11
 
 int main(){
-char *portname = "/dev/serial0";
-int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
-set_interface_attribs (fd, B57600, 0);  // set speed to 57,600 bps, 8n1 (no parity)
-set_blocking (fd, 0);                // set no blocking
-byte *ret = FlightStatusDataUnion.arr;
-if (fd < 0)
-{
-        error_message ("error %d opening %s: %s", errno, portname, strerror (errno));
-        return 1;
-}
-unsigned long objId = FLIGHTSTATUS_OBJID;
-  _pBuf[0] = 0x3c; //sync
-  _pBuf[1] = 0x21; //msgtype (0x21 = request)
-  _pBuf[2] = 0x0a; //len
-  _pBuf[3] = 0x00; //len
-  _pBuf[4] = (objId >> (8*0)) & 0xff; 
-//	printf("%x", _pBuf[4]);
-  _pBuf[5] = (objId >> (8*1)) & 0xff;
-//	printf("%x", _pBuf[5]);
-  _pBuf[6] = (objId >> (8*2)) & 0xff;
-//	printf("%x", _pBuf[6]);
-  _pBuf[7] = (objId >> (8*3)) & 0xff;
-//	printf("%x", _pBuf[7]);
-  _pBuf[8] = 0x00; //iid
-  _pBuf[9] = 0x00; //iid
-_pBuf[10] = _crc(10); //crc
 
-write (fd, _pBuf, 11);           // send 7 character greeting
-usleep ((11 + 25) * 100);             // sleep enough to transmit the 7 plus
+    char *portname = "/dev/serial0";
+    int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
+    set_interface_attribs (fd, B57600, 0);  // set speed to 57,600 bps, 8n1 (no parity)
+    set_blocking (fd, 0);                // set no blocking
+    //byte *ret = FlightStatusDataUnion.arr;
+    byte *ret = GCSReceiverDataUnion.arr;
+        if (fd < 0)
+        {
+                error_message ("error %d opening %s: %s", errno, portname, strerror (errno));
+                return 1;
+        }
+    
+    //unsigned long objId = FLIGHTSTATUS_OBJID;
+      unsigned long objId = GCSRECEIVER_OBJID;
+    _pBuf[0] = 0x3c; //sync
+    _pBuf[1] = 0x21; //msgtype (0x21 = request)
+    _pBuf[2] = 0x0a; //len
+    _pBuf[3] = 0x00; //len
+    _pBuf[4] = (objId >> (8*0)) & 0xff; 
+    _pBuf[5] = (objId >> (8*1)) & 0xff;
+    _pBuf[6] = (objId >> (8*2)) & 0xff;
+    _pBuf[7] = (objId >> (8*3)) & 0xff;
+    _pBuf[8] = 0x00; //iid
+    _pBuf[9] = 0x00; //iid
+    _pBuf[10] = _crc(10); //crc
+
+  if (write(fd, _pBuf, 11) != BUF_SIZE) {
+    printf(" Error at write(): %s\n",
+           strerror(errno));
+            exit(1);
+        }
+
+   // write (fd, _pBuf, 11);           // send 7 character greeting
+    usleep ((11 + 25) * 100);             // sleep enough to transmit the 7 plus
                                      // receive 25:  approx 100 uS per char transmit
 
-char buf [100], rec[100];
-int n = read (fd, buf, sizeof buf); 
+    char buf [100], rec[100];
+    int n = read (fd, buf, sizeof buf); 
 
 printf("heres the data\n");
 for(int t=0;t<sizeof(buf);t++){
@@ -170,16 +177,18 @@ if(buf[0]==0x3c){
 	     int datalen = len - 10;;
              for (j = 10; j < len; j++) {
                ret[j-10] = buf[j];
-	//		   printf("putting values in the union struct");
              }
-    			printf("print union vals");
+    		printf("print union vals");
 			for(int i=0;i<sizeof(ret);i++){
 			printf("%X",ret[i]);
 }
-
-		printf("\n%x", FlightStatusDataUnion.data.Armed);
-		printf("\n%d",FlightStatusDataUnion.data.Armed); 
-		printf("\n%d",FlightStatusDataUnion.data.FlightMode);
+        int p;
+        for(p=0;p<8;p++){
+            printf("\n%x", GCSReceiver.data.Channel[i]);
+        }
+		//printf("\n%x", FlightStatusDataUnion.data.Armed);
+		//printf("\n%d",FlightStatusDataUnion.data.Armed); 
+		//printf("\n%d",FlightStatusDataUnion.data.FlightMode);
  
 }
 	
